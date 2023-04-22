@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title></title>
+</head>
+<body>
+<script>
+window.addEventListener('load', async () => {
+	if (window.ethereum) {
+		window.alert('Modern dapp browsers')
+		ethereum.autoRefreshOnNetworkChange = false;
+		window.ethereum.on('networkChanged', function(id) {console.log(id) });
+		window.web3 = new Web3(ethereum);
+		accounts = await ethereum.enable();
+		web3.eth.getBalance(accounts[0], function(err, res) { 
+			let msg = accounts[0] + ":\n" + res + "wei";
+			alert(msg)
+		});
+	} else if (window.web3) {
+		window.alert('Legacy dapp browsers')
+	} else {
+		window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
+	}
+});
+</script>
+</body>
+</html>

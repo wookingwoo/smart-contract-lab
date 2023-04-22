@@ -1,0 +1,374 @@
+<html>
+<head>
+<script type="text/javascript"> 
+var accounts;
+var constructInstance;
+var resultbox;
+var callbacks = new Map();
+
+window.addEventListener('load', crowdfund);
+
+async function crowdfund() {
+  if (window.ethereum) {
+    ethereum.autoRefreshOnNetworkChange = false;
+    window.ethereum.on('networkChanged', function(id) {console.log(id) });
+    window.web3 = new Web3(ethereum);
+    accounts = await ethereum.enable();
+    web3.eth.getBalance(accounts[0], function(err, res) { console.log(res)});
+    var address = "0xe5028Fc0600B3354BA1b434215767003cf8b1F09";
+    var abiobj = [
+										{
+																"constant": false,
+																"inputs": [],
+																"name": "checkGoalReached",
+																"outputs": [],
+																"payable": true,
+																"stateMutability": "payable",
+																"type": "function"
+															},
+										{
+																"constant": false,
+																"inputs": [],
+																"name": "fund",
+																"outputs": [],
+																"payable": true,
+																"stateMutability": "payable",
+																"type": "function"
+															},
+										{
+																"constant": false,
+																"inputs": [],
+																"name": "kill",
+																"outputs": [],
+																"payable": false,
+																"stateMutability": "nonpayable",
+																"type": "function"
+															},
+										{
+																"inputs": [
+																							{
+																															"internalType": "uint256",
+																															"name": "_duration",
+																															"type": "uint256"
+																														},
+																							{
+																															"internalType": "uint256",
+																															"name": "_goalAmount",
+																															"type": "uint256"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "nonpayable",
+																"type": "constructor"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "deadline",
+																"outputs": [
+																							{
+																															"internalType": "uint256",
+																															"name": "",
+																															"type": "uint256"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "ended",
+																"outputs": [
+																							{
+																															"internalType": "bool",
+																															"name": "",
+																															"type": "bool"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "getBalance",
+																"outputs": [
+																							{
+																															"internalType": "uint256",
+																															"name": "",
+																															"type": "uint256"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "goalAmount",
+																"outputs": [
+																							{
+																															"internalType": "uint256",
+																															"name": "",
+																															"type": "uint256"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [
+																							{
+																															"internalType": "uint256",
+																															"name": "",
+																															"type": "uint256"
+																														}
+																						],
+																"name": "investors",
+																"outputs": [
+																							{
+																															"internalType": "address payable",
+																															"name": "addr",
+																															"type": "address"
+																														},
+																							{
+																															"internalType": "uint256",
+																															"name": "amount",
+																															"type": "uint256"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "numInvestors",
+																"outputs": [
+																							{
+																															"internalType": "uint256",
+																															"name": "",
+																															"type": "uint256"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "owner",
+																"outputs": [
+																							{
+																															"internalType": "address payable",
+																															"name": "",
+																															"type": "address"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "status",
+																"outputs": [
+																							{
+																															"internalType": "string",
+																															"name": "",
+																															"type": "string"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															},
+										{
+																"constant": true,
+																"inputs": [],
+																"name": "totalAmount",
+																"outputs": [
+																							{
+																															"internalType": "uint256",
+																															"name": "",
+																															"type": "uint256"
+																														}
+																						],
+																"payable": false,
+																"stateMutability": "view",
+																"type": "function"
+															}
+									];
+    contractInstance = web3.eth.contract(abiobj).at(address);//, contractAddress);
+	 console.log(window.contractInstance);
+  // Legacy dapp browsers...
+  } else if (window.web3) {
+    window.web3 = new Web3(web3.currentProvider);
+    // Acccounts always exposed
+//    web3.eth.sendTransaction({/* ... */});
+  }
+  // Non-dapp browsers...
+  else {
+    console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+    window.web3 = null
+  }
+
+  let btn = document.getElementById("checkGoalReached");
+  btn.addEventListener('click', checkGoalReached);
+  btn = document.getElementById("fund");
+  btn.addEventListener('click', fund);
+  btn = document.getElementById("kill");
+  btn.addEventListener('click', kill);
+  btn = document.getElementById("investors");
+  btn.addEventListener('click', investors);
+
+  callbacks.set("deadline", contractInstance.deadline);
+  callbacks.set("ended", contractInstance.ended);
+  callbacks.set("getBalance", contractInstance.getBalance);
+  callbacks.set("goalAmount", contractInstance.goalAmount);
+  callbacks.set("numInvestors", contractInstance.numInvestors);
+  callbacks.set("status", contractInstance.status);
+  callbacks.set("totalAmount", contractInstance.totalAmount);
+  callbacks.set("owner", contractInstance.owner);
+
+  btn = document.getElementById("deadline");
+  btn.addEventListener('click', showvalues);
+  btn = document.getElementById("ended");
+  btn.addEventListener('click', showvalues);
+  btn = document.getElementById("getBalance");
+  btn.addEventListener('click', showvalues);
+  btn = document.getElementById("goalAmount");
+  btn.addEventListener('click', showvalues);
+  btn = document.getElementById("numInvestors");
+  btn.addEventListener('click', showvalues);
+  btn = document.getElementById("status");
+  btn.addEventListener('click', showvalues);
+  btn = document.getElementById("totalAmount");
+  btn.addEventListener('click', showvalues);
+  btn = document.getElementById("owner");
+  btn.addEventListener('click', showvalues);
+
+  resultbox = document.getElementById("resultbox");
+}
+
+
+async function checkGoalReached() {
+  if (contractInstance != null) {
+    try {
+
+        contractInstance.checkGoalReached(function(err, value) {
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function fund() {
+  if (contractInstance != null) {
+    try {
+        let valtxt = document.getElementById("fundamt");
+        let val = valtxt.value;
+        contractInstance.fund(function(err, value) {
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function kill() {
+  if (contractInstance != null) {
+    try {
+        contractInstance.kill(function(err, value) {
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function investors() {
+  if (contractInstance != null) {
+    try {
+        let valtxt = document.getElementById("fundamt");
+        let val = valtxt.value;
+        contractInstance.investors(function(err, value) {
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function showvalues() {
+  if (contractInstance != null) {
+    try {
+        fn = callbacks.get(this.id);
+        fn(function(err, value) {
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+
+</script>
+</head>
+<body>
+<h1> CrowdFund Test </h1>
+<br/>
+<input type="button" id="checkGoalReached" value="checkGoalReached()">
+<br/>
+<input type="button" id="fund" value="fund()"> Amount: <input type="text" id="fundamt" value="">  Wei
+<br/>
+<input type="button" id="kill" value="kill()">
+<br/>
+<input type="button" id="deadline" value="deadline">
+<br/>
+<input type="button" id="ended" value="ended">
+<br/>
+<input type="button" id="investors" value="investors">  index: <input type="text" id="investorid" value="">
+<br/>
+<input type="button" id="getBalance" value="getBalance()">
+<br/>
+<input type="button" id="goalAmount" value="goalAmount">
+<br/>
+<input type="button" id="numInvestors" value="numInvestors">
+<br/>
+<input type="button" id="status" value="status">
+<br/>
+<input type="button" id="totalAmount" value="totalAmount">
+<br/>
+<input type="button" id="owner" value="owner">
+<br/>
+Result: <span id="resultbox"> </span>
+
+
+</body>
+</html>

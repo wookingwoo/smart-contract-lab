@@ -1,0 +1,231 @@
+<html>
+<head>
+<script type="text/javascript"> 
+var accounts;
+var constructInstance;
+
+window.addEventListener('load', async () => {
+  if (window.ethereum) {
+    window.web3 = new Web3(ethereum);
+    accounts = await ethereum.enable();
+    var abiobj = [
+	    	{
+					"constant": false,
+					"inputs": [
+									{
+														"internalType": "string",
+														"name": "_msg2",
+														"type": "string"
+													}
+								],
+					"name": "setMsg2",
+					"outputs": [],
+					"payable": false,
+					"stateMutability": "nonpayable",
+					"type": "function"
+				},
+	    	{
+					"constant": true,
+					"inputs": [],
+					"name": "counter",
+					"outputs": [
+									{
+														"internalType": "uint8",
+														"name": "",
+														"type": "uint8"
+													}
+								],
+					"payable": false,
+					"stateMutability": "view",
+					"type": "function"
+				},
+	    	{
+					"constant": true,
+					"inputs": [],
+					"name": "getMsg2",
+					"outputs": [
+									{
+														"internalType": "string",
+														"name": "",
+														"type": "string"
+													}
+								],
+					"payable": false,
+					"stateMutability": "view",
+					"type": "function"
+				},
+	    	{
+					"constant": false,
+					"inputs": [],
+					"name": "setCounter",
+					"outputs": [],
+					"payable": false,
+					"stateMutability": "nonpayable",
+					"type": "function"
+				},
+	    	{
+					"constant": true,
+					"inputs": [],
+					"name": "owner",
+					"outputs": [
+									{
+														"internalType": "address",
+														"name": "",
+														"type": "address"
+													}
+								],
+					"payable": false,
+					"stateMutability": "view",
+					"type": "function"
+				},
+	    	{
+					"constant": true,
+					"inputs": [],
+					"name": "msg1",
+					"outputs": [
+									{
+														"internalType": "string",
+														"name": "",
+														"type": "string"
+													}
+								],
+					"payable": false,
+					"stateMutability": "view",
+					"type": "function"
+				},
+	    	{
+					"inputs": [
+									{
+														"internalType": "string",
+														"name": "_msg1",
+														"type": "string"
+													}
+								],
+					"payable": false,
+					"stateMutability": "nonpayable",
+					"type": "constructor"
+				}
+	    ];
+    var address = "0xa9410192Ab050Eb744E79f69371F22E8A41Ea08c";
+    contractInstance = web3.eth.contract(abiobj).at(address);//, contractAddress);
+    contractInstance.counter(function(err, value) { 
+				alert(value)
+    });
+  // Legacy dapp browsers...
+  } else if (window.web3) {
+    window.web3 = new Web3(web3.currentProvider);
+    // Acccounts always exposed
+//    web3.eth.sendTransaction({/* ... */});
+  }
+  // Non-dapp browsers...
+  else {
+    console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+    window.web3 = null
+  }
+
+  let btn = document.getElementById("setMsg2");
+  btn.addEventListener('click', setMsg2Clicked);
+  btn = document.getElementById("setCounter");
+  btn.addEventListener('click', setCounterClicked);
+  btn = document.getElementById("counter");
+  btn.addEventListener('click', counterClicked);
+  btn = document.getElementById("getMsg2");
+  btn.addEventListener('click', getMsg2Clicked);
+  btn = document.getElementById("msg1");
+  btn.addEventListener('click', msg1Clicked);
+  btn = document.getElementById("owner");
+  btn.addEventListener('click', ownerClicked);
+
+});
+
+async function setMsg2Clicked() {
+	alert("setMsg2Clicked()");
+}
+
+async function setCounterClicked() {
+	alert("setCounterClicked()");
+}
+
+async function counterClicked() {
+  if (contractInstance != null) {
+    try {
+        contractInstance.counter(function(err, value) {
+          let resultbox = document.getElementById("resultbox");
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function getMsg2Clicked() {
+  if (contractInstance != null) {
+    try {
+        contractInstance.getMsg2(function(err, value) {
+          let resultbox = document.getElementById("resultbox");
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function msg1Clicked() {
+  if (contractInstance != null) {
+    try {
+        contractInstance.msg1(function(err, value) {
+          let resultbox = document.getElementById("resultbox");
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+async function ownerClicked() {
+  if (contractInstance != null) {
+    try {
+        contractInstance.owner(function(err, value) {
+          let resultbox = document.getElementById("resultbox");
+          resultbox.innerHTML = value;
+        });
+
+    } catch (error) {
+        resultbox.innerHTML = "error occured";
+        console.log(error);
+    }
+  }
+}
+
+
+
+</script>
+</head>
+<body>
+	<h1> Hello Ethereum Test </h1>
+	<br/>
+	<input type="button" id="setMsg2" value="setMsg2()">
+	<input type="text" id="msg2" value="">
+	<br/>
+	<input type="button" id="setCounter" value="setCounter()">
+	<br/>
+	<input type="button" id="counter" value="counter">
+	<br/>
+	<input type="button" id="getMsg2" value="getMsg2">
+	<br/>
+	<input type="button" id="msg1" value="msg1">
+	<br/>
+	<input type="button" id="owner" value="owner">
+	<br/>
+	Result: <span id="resultbox"> </span>
+</body>
+</html>
